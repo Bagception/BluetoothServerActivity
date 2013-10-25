@@ -61,14 +61,14 @@ public class BTServerController extends Activity implements
 		ServiceUtil.requestStatusForServiceObservable(this,
 				ServiceNames.BLUETOOTH_SERVER_SERVICE);
 		btStateActor.refireBluetoothCallbacks();
-		updateClientConnected();
+		updateClientConnected(0);
 		registerReceiver(serverStatusListener, new IntentFilter(
 				BagceptionBroadcastContants.BROADCAST_CLIENTS_CONNECTION_UPDATE));
 	}
 
-	private void updateClientConnected() {
+	private void updateClientConnected(int count) {
 		TextView v = (TextView) findViewById(R.id.ssClcon);
-		//TODO v.setText(BluetoothServerHandler.getClientsConnected() + "");
+		v.setText(""+count);
 	}
 
 	@Override
@@ -95,7 +95,7 @@ public class BTServerController extends Activity implements
 		b.putString("cmd", "msg");
 		b.putString("payload", txt);
 		Message m = Message.obtain(null,
-				MessengerConstants.MESSAGE_BUNDLE_SEND, txt);
+				MessengerConstants.MESSAGE_BUNDLE_MESSAGE);
 		m.setData(b);
 		try {
 			serviceMessenger.send(m);
@@ -225,7 +225,8 @@ public class BTServerController extends Activity implements
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			Log.d("BT", "serverStatus recv");
-			updateClientConnected();
+			int cnt=intent.getIntExtra(BagceptionBroadcastContants.BROADCAST_CLIENTS_CONNECTION_UPDATE, 0);
+			updateClientConnected(cnt);
 
 		}
 	};
@@ -264,11 +265,16 @@ public class BTServerController extends Activity implements
 		// Handles incoming messages
 		@Override
 		public boolean handleMessage(Message msg) {
-			Log.d(TAG, "handle " + msg.toString());
+			switch(msg.what){
+			case MessengerConstants.MESSAGE_BUNDLE_MESSAGE:
+				Log.d(TAG, "handle " + msg.toString());
+				
+				Toast.makeText(BTServerController.this, msg.getData().toString(),
+						Toast.LENGTH_SHORT).show();
 
-			Toast.makeText(BTServerController.this, msg.getData().toString(),
-					Toast.LENGTH_SHORT).show();
-			return false;
+				break;
+			}
+				return false;
 		}
 	});
 
