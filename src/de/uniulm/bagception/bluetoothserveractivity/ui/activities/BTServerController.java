@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import de.philipphock.android.lib.broadcast.blutooth.BluetoothStateActor;
 import de.philipphock.android.lib.broadcast.blutooth.BluetoothStateChangeReactor;
+import de.philipphock.android.lib.logging.LOG;
 import de.philipphock.android.lib.services.ServiceUtil;
 import de.philipphock.android.lib.services.messenger.MessengerService;
 import de.philipphock.android.lib.services.observation.ServiceObservationActor;
@@ -64,6 +65,7 @@ public class BTServerController extends Activity implements
 		updateClientConnected(0);
 		registerReceiver(serverStatusListener, new IntentFilter(
 				BagceptionBroadcastContants.BROADCAST_CLIENTS_CONNECTION_UPDATE));
+		sendUpdateServerInfoRequest();
 	}
 
 	private void updateClientConnected(int count) {
@@ -267,8 +269,10 @@ public class BTServerController extends Activity implements
 		public boolean handleMessage(Message msg) {
 			switch(msg.what){
 			case MessengerConstants.MESSAGE_BUNDLE_MESSAGE:
-				Log.d(TAG, "handle " + msg.toString());
-				
+				Log.d(TAG, "handle " + msg.getData().toString());
+				for (String key:msg.getData().keySet()){
+					LOG.out(key,msg.getData().get(key));
+				}
 				Toast.makeText(BTServerController.this, msg.getData().toString(),
 						Toast.LENGTH_SHORT).show();
 
@@ -304,6 +308,14 @@ public class BTServerController extends Activity implements
 		}
 	}
 
+	
+	private void sendUpdateServerInfoRequest(){
+		
+		Intent br = new Intent();
+		br.setAction(BagceptionBroadcastContants.BROADCAST_CLIENTS_CONNECTION_UPDATE_REQUEST);
+		sendBroadcast(br);
+	}
+	
 	// ###### /IPC ######\\
 
 }
